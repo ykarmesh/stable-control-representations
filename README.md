@@ -29,7 +29,7 @@ To install our visual cortex models and CortexBench, please follow the instructi
 ## Directory structure
 
 - `vc_models`: contains config files for visual cortex models, the model loading code and, as well as some project utilities.
-    - See [README](./vc-models/README.md) for more details.
+    - See [README](./vc_models/README.md) for more details.
 - `cortexbench`: embodied AI downstream tasks to evaluate pre-trained representations.
 - `third_party`: Third party submodules which aren't expected to change often.
 - `data`: Gitignored directory, needs to be created by the user. Is used by some downstream tasks to find (symlinks to) datasets, models, etc.
