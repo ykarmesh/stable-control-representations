@@ -1,7 +1,0 @@
-# @package hydra
-run:
-  dir: ???
-  subdir: ${hydra.job.num}_${hydra.job.override_dirname}
-sweep:
-  dir: ???
-  subdir: ${hydra.job.num}_${hydra.job.override_dirname}

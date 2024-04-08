@@ -11,7 +11,7 @@ CHECKPOINT_FOLDER: ${hydra:sweep.dir}/checkpoints
 LOG_DIR: ${hydra:sweep.dir}/logs
 LOG_FILE: ${hydra:sweep.dir}/train.log
 
-NUM_ENVIRONMENTS: 10
+NUM_ENVIRONMENTS: 20
 LOG_INTERVAL: 100
 NUM_CHECKPOINTS: 100
 NUM_UPDATES: -1
@@ -20,7 +20,7 @@ TOTAL_NUM_STEPS: 500e6
 FORCE_TORCH_SINGLE_THREADED: True
 
 EVAL:
-  SPLIT: "val"
+  SPLIT: "val_combined"
   USE_CKPT_CONFIG: True
   EVAL_FREQ: 5
 
@@ -36,10 +36,11 @@ RL:
     num_recurrent_layers: 2
     use_augmentations: True
     use_augmentations_test_time: True
+    normalize_visual_inputs: False
     freeze_batchnorm: True
     freeze_backbone: False
-    global_pool: False
-    use_cls: False
+    use_same_encoder: False
+    compression_kernel_size: 3
 
   PPO:
     clip_param: 0.2

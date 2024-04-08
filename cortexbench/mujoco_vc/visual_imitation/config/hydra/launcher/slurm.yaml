@@ -5,7 +5,6 @@ hydra:
         gpus_per_node: 1
         tasks_per_node: 1
         timeout_min: 1000
-        partition: devlab
         mem_gb: 64
         name: ${hydra.job.name}
         # array_parallelism: 256

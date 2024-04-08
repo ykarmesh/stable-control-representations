@@ -1,3 +1,0 @@
-_target_: vc_models.transforms.resnet_transforms
-resize_size: 128
-output_size: 128

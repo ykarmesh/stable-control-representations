@@ -15,6 +15,7 @@ from habitat_baselines.rl.models.rnn_state_encoder import build_rnn_state_encode
 from habitat_baselines.rl.ppo import Net, Policy
 from torch import nn as nn
 
+from vc_models.transforms.randomize_env_transform import RandomizeEnvTransform
 from habitat_vc.rl.imagenav.sensors import ImageGoalRotationSensor
 from habitat_vc.visual_encoder import VisualEncoder
 from habitat_vc.models.freeze_batchnorm import convert_frozen_batchnorm
@@ -32,11 +33,12 @@ class EAINet(Net):
         num_recurrent_layers: int,
         use_augmentations: bool,
         use_augmentations_test_time: bool,
+        normalize_visual_inputs: bool,
         run_type: str,
         freeze_backbone: bool,
         freeze_batchnorm: bool,
-        global_pool: bool,
-        use_cls: bool,
+        use_same_encoder: bool,
+        compression_kernel_size: int,
     ):
         super().__init__()
 
@@ -53,9 +55,9 @@ class EAINet(Net):
         self.visual_encoder = VisualEncoder(
             backbone_config=backbone_config,
             image_size=input_image_size,
-            global_pool=global_pool,
-            use_cls=use_cls,
             use_augmentations=use_augmentations,
+            normalize_visual_inputs=normalize_visual_inputs,
+            compression_kernel_size=compression_kernel_size,
         )
 
         self.visual_fc = nn.Sequential(
@@ -75,16 +77,19 @@ class EAINet(Net):
 
         # image goal embedding
         if ImageGoalRotationSensor.cls_uuid in observation_space.spaces:
-            self.goal_visual_encoder = VisualEncoder(
-                backbone_config=backbone_config,
-                image_size=input_image_size,
-                global_pool=global_pool,
-                use_cls=use_cls,
-                use_augmentations=use_augmentations,
-                loaded_backbone_data=self.visual_encoder.get_loaded_backbone_data()
-                if freeze_backbone
-                else None,
-            )
+            if use_same_encoder:
+                self.goal_visual_encoder = self.visual_encoder
+            else:
+                self.goal_visual_encoder = VisualEncoder(
+                    backbone_config=backbone_config,
+                    image_size=input_image_size,
+                    use_augmentations=use_augmentations,
+                    normalize_visual_inputs=normalize_visual_inputs,
+                    loaded_backbone_data=self.visual_encoder.get_loaded_backbone_data()
+                    if freeze_backbone
+                    else None,
+                    compression_kernel_size=compression_kernel_size,
+                )
 
             self.goal_visual_fc = nn.Sequential(
                 nn.Linear(self.goal_visual_encoder.output_size, hidden_size),
@@ -153,7 +158,10 @@ class EAINet(Net):
         x = (
             x.permute(0, 3, 1, 2).float() / 255
         )  # convert channels-last to channels-first
-        x = self.visual_encoder.visual_transform(x, number_of_envs)
+        if type(self.visual_encoder.visual_transform) == RandomizeEnvTransform:
+            x = self.visual_encoder.visual_transform(x, number_of_envs)
+        else:
+            x = self.visual_encoder.visual_transform(x)
 
         return x.chunk(2, dim=0) if imagenav_task else x
 
@@ -214,11 +222,12 @@ class EAIPolicy(Policy):
         num_recurrent_layers: int = 1,
         use_augmentations: bool = False,
         use_augmentations_test_time: bool = False,
+        normalize_visual_inputs: bool = False,
         run_type: str = "train",
         freeze_backbone: bool = False,
         freeze_batchnorm: bool = False,
-        global_pool: bool = False,
-        use_cls: bool = False,
+        use_same_encoder: bool = False,
+        compression_kernel_size: int = 3,
         **kwargs
     ):
         super().__init__(
@@ -232,11 +241,12 @@ class EAIPolicy(Policy):
                 num_recurrent_layers=num_recurrent_layers,
                 use_augmentations=use_augmentations,
                 use_augmentations_test_time=use_augmentations_test_time,
+                normalize_visual_inputs=normalize_visual_inputs,
                 run_type=run_type,
                 freeze_backbone=freeze_backbone,
                 freeze_batchnorm=freeze_batchnorm,
-                global_pool=global_pool,
-                use_cls=use_cls,
+                use_same_encoder=use_same_encoder,
+                compression_kernel_size=compression_kernel_size,
             ),
             dim_actions=action_space.n,  # for action distribution
         )
@@ -253,9 +263,10 @@ class EAIPolicy(Policy):
             num_recurrent_layers=config.RL.POLICY.num_recurrent_layers,
             use_augmentations=config.RL.POLICY.use_augmentations,
             use_augmentations_test_time=config.RL.POLICY.use_augmentations_test_time,
+            normalize_visual_inputs=config.RL.POLICY.normalize_visual_inputs,
             run_type=config.RUN_TYPE,
             freeze_backbone=config.RL.POLICY.freeze_backbone,
             freeze_batchnorm=config.RL.POLICY.freeze_batchnorm,
-            global_pool=config.RL.POLICY.global_pool,
-            use_cls=config.RL.POLICY.use_cls,
+            use_same_encoder=config.RL.POLICY.use_same_encoder,
+            compression_kernel_size=config.RL.POLICY.compression_kernel_size,
         )

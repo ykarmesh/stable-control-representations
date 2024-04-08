@@ -145,8 +145,6 @@ _CONFIG.RL.POLICY.num_recurrent_layers = 2
 _CONFIG.RL.POLICY.use_augmentations = True
 _CONFIG.RL.POLICY.use_augmentations_test_time = True
 _CONFIG.RL.POLICY.freeze_backbone = False
-_CONFIG.RL.POLICY.global_pool = False
-_CONFIG.RL.POLICY.use_cls = False
 
 _CONFIG.RL.PPO.clip_param = 0.2
 _CONFIG.RL.PPO.ppo_epoch = 2
@@ -186,6 +184,9 @@ _CONFIG.MODEL.RGB_ENCODER.use_augmentations = True
 _CONFIG.MODEL.RGB_ENCODER.use_augmentations_test_time = True
 _CONFIG.MODEL.RGB_ENCODER.pretrained_encoder = None
 _CONFIG.MODEL.RGB_ENCODER.freeze_backbone = False
+_CONFIG.MODEL.RGB_ENCODER.use_same_encoder = True
+_CONFIG.MODEL.RGB_ENCODER.compression_kernel_size = 3
+_CONFIG.MODEL.RGB_ENCODER.normalize_visual_inputs = False
 _CONFIG.MODEL.RGB_ENCODER.drop_path_rate = 0.0
 
 def get_config(

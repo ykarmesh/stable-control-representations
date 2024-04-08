@@ -21,7 +21,7 @@ cwd = os.getcwd()
 # ===============================================================================
 # Process Inputs and configure job
 # ===============================================================================
-@hydra.main(config_path="config", config_name="DMC_BC_config", version_base="1.1")
+@hydra.main(config_path="config", config_name="Metaworld_BC_config")
 def configure_jobs(config: dict) -> None:
     print("========================================")
     print("Job Configuration")

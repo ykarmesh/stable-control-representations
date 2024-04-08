@@ -15,7 +15,6 @@ install_requires = [
     "mjrl",
     "gym",
     "mj_envs",
-    "dmc2gym",
 ]
 
 setup(

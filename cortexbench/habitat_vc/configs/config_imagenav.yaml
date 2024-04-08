@@ -1,7 +1,7 @@
 defaults:
   - tasks@: imagenav
   - experiments@: imagenav_rl
-  - model: vc1_vitl
+  - model: scr
   - model/transform: jitter_and_shift
   - wandb_habitat@: habitat_vc
   - override hydra/output: path

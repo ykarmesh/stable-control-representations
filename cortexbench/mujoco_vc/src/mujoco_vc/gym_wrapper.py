@@ -4,14 +4,14 @@
 # This source code is licensed under the CC-BY-NC license found in the
 # LICENSE file in the root directory of this source tree.
 
-import numpy as np
-import torch
+import numpy as np, torch
 import gym
 from mjrl.utils.gym_env import GymEnv
 from gym.spaces.box import Box
 from mujoco_vc.model_loading import load_pretrained_model
-from mujoco_vc.supported_envs import ENV_TO_SUITE
-from typing import Union, Tuple
+from mujoco_vc.supported_envs import ENV_TO_SUITE, SUPPORTED_SUITES
+from mujoco_vc.supported_envs import DEFAULTS_PROPRIO
+from typing import Union
 
 
 class MuJoCoPixelObsWrapper(gym.ObservationWrapper):
@@ -24,7 +24,7 @@ class MuJoCoPixelObsWrapper(gym.ObservationWrapper):
         device_id=-1,
         depth=False,
         *args,
-        **kwargs
+        **kwargs,
     ):
         gym.ObservationWrapper.__init__(self, env)
         self.observation_space = Box(low=0.0, high=255.0, shape=(3, width, height))
@@ -33,30 +33,17 @@ class MuJoCoPixelObsWrapper(gym.ObservationWrapper):
         self.camera_name = camera_name
         self.depth = depth
         self.device_id = device_id
+        self.suite = ENV_TO_SUITE[self.spec.id]
 
-    def get_image(self):
-        if self.spec.id.startswith("dmc"):
-            # dmc backend
-            # dmc expects camera_id as an integer and not name
-            if self.camera_name == None or self.camera_name == "None":
-                self.camera_name = 0
-            img = self.env.unwrapped.render(
-                mode="rgb_array",
-                width=self.width,
-                height=self.height,
-                camera_id=int(self.camera_name),
-            )
-        else:
-            # mujoco-py backend
-            img = self.sim.render(
-                width=self.width,
-                height=self.height,
-                depth=self.depth,
-                camera_name=self.camera_name,
-                device_id=self.device_id,
-            )
-            img = img[::-1, :, :]
-        return img
+        self.get_image = lambda: get_image(
+            env=self,
+            suite=self.suite,
+            camera_name=self.camera_name,
+            height=self.height,
+            width=self.width,
+            depth=self.depth,
+            device_id=self.device_id,
+        )
 
     def observation(self, observation):
         # This function creates observations based on the current state of the environment.
@@ -71,7 +58,7 @@ class FrozenEmbeddingWrapper(gym.ObservationWrapper):
 
     Args:
         env (Gym environment): the original environment
-        suite (str): category of environment ["dmc", "adroit", "metaworld"]
+        suite (str): category of environment ["metaworld"]
         embedding_name (str): name of the embedding to use (name of config)
         history_window (int, 1) : timesteps of observation embedding to incorporate into observation (state)
         embedding_fusion (callable, 'None'): function for fusing the embeddings into a state.
@@ -85,7 +72,7 @@ class FrozenEmbeddingWrapper(gym.ObservationWrapper):
     def __init__(
         self,
         env,
-        embedding_name: str,
+        embedding_config: dict,
         suite: str,
         history_window: int = 1,
         fuse_embeddings: callable = None,
@@ -93,11 +80,11 @@ class FrozenEmbeddingWrapper(gym.ObservationWrapper):
         device: str = "cuda",
         seed: int = None,
         add_proprio: bool = False,
+        proprio_keys: list = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         gym.ObservationWrapper.__init__(self, env)
-
         self.embedding_buffer = (
             []
         )  # buffer to store raw embeddings of the image observation
@@ -114,7 +101,7 @@ class FrozenEmbeddingWrapper(gym.ObservationWrapper):
 
         # get the embedding model
         embedding, embedding_dim, transforms, metadata = load_pretrained_model(
-            embedding_name=embedding_name, seed=seed
+            embedding_config=embedding_config, seed=seed
         )
         embedding.to(device=self.device)
         # freeze the PVR
@@ -128,7 +115,9 @@ class FrozenEmbeddingWrapper(gym.ObservationWrapper):
 
         # proprioception
         if add_proprio:
-            self.get_proprio = lambda: get_proprioception(self.unwrapped, suite)
+            self.get_proprio = lambda: get_proprioception(
+                self.unwrapped, suite, proprio_keys
+            )
             proprio = self.get_proprio()
             self.proprio_dim = 0 if proprio is None else proprio.shape[0]
         else:
@@ -193,6 +182,7 @@ class FrozenEmbeddingWrapper(gym.ObservationWrapper):
 
 def env_constructor(
     env_name: str,
+    embedding_config: dict,
     pixel_based: bool = True,
     device: str = "cuda",
     image_width: int = 256,
@@ -204,8 +194,9 @@ def env_constructor(
     render_gpu_id: int = -1,
     seed: int = 123,
     add_proprio=False,
+    proprio_keys=None,
     *args,
-    **kwargs
+    **kwargs,
 ) -> GymEnv:
     # construct basic gym environment
     assert env_name in ENV_TO_SUITE.keys()
@@ -221,7 +212,7 @@ def env_constructor(
         e.spec.id = env_name
         e.spec.max_episode_steps = 500
     else:
-        e = gym.make(env_name)
+        raise NotImplementedError("Only metaworld environments are supported.")
     # seed the environment for reproducibility
     e.seed(seed)
 
@@ -240,13 +231,14 @@ def env_constructor(
         )
         e = FrozenEmbeddingWrapper(
             env=e,
-            embedding_name=embedding_name,
+            embedding_config=embedding_config,
             suite=suite,
             history_window=history_window,
             fuse_embeddings=fuse_embeddings,
             device=device,
             seed=seed,
             add_proprio=add_proprio,
+            proprio_keys=proprio_keys,
         )
         e = GymEnv(e)
     else:
@@ -257,24 +249,49 @@ def env_constructor(
     return e
 
 
-def get_proprioception(env: gym.Env, suite: str) -> Union[np.ndarray, None]:
+def get_proprioception(
+    env: gym.Env,
+    suite: str,
+    proprio_keys: Union[list, None, str] = "default",  # only for robohive
+    *args,
+    **kwargs,
+) -> Union[np.ndarray, None]:
+    # Checks + Default behaviors
     assert isinstance(env, gym.Env)
+    assert suite in SUPPORTED_SUITES
+    if proprio_keys == "default":
+        proprio_keys = DEFAULTS_PROPRIO[suite]
+
     if suite == "metaworld":
         return env.unwrapped._get_obs()[:4]
-    elif suite == "adroit":
-        # In adroit, in-hand tasks like pen lock the base of the hand
-        # while other tasks like relocate allow for movement of hand base
-        # as if attached to an arm
-        if env.unwrapped.spec.id == "pen-v0":
-            return env.unwrapped.get_obs()[:24]
-        elif env.unwrapped.spec.id == "relocate-v0":
-            return env.unwrapped.get_obs()[:30]
-        else:
-            print("Unsupported environment. Proprioception is defaulting to None.")
-            return None
-    elif suite == "dmc":
-        # no proprioception used for dm-control
-        return None
     else:
         print("Unsupported environment. Proprioception is defaulting to None.")
         return None
+
+
+def get_image(
+    env: gym.Env,
+    suite: str,
+    camera_name: str,
+    height: int = 224,
+    width: int = 224,
+    depth: bool = False,
+    device_id: int = -1,
+) -> Union[np.ndarray, None]:
+    assert isinstance(env, gym.Env)
+    if suite == "metaworld":
+        # mujoco-py backend
+        img = env.unwrapped.sim.render(
+            width=width,
+            height=height,
+            depth=depth,
+            camera_name=camera_name,
+            device_id=device_id,
+        )
+        img = img[::-1, :, :]
+    else:
+        print("Unsupported Env Suite.")
+        assert (
+            suite in SUPPORTED_SUITES
+        ), f"{suite} not in supported suites {SUPPORTED_SUITES}"
+    return img

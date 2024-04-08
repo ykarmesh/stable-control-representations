@@ -1,59 +1,80 @@
 defaults:
+    - model: diffusion_sd_15_laion
     - wandb: cortexbench
     - override hydra/launcher: local
+    - _self_
 
 # general inputs
-env               :   ???                     # name of environment (e.g. relocate-v0)
-algorithm         :   BC
-pixel_based       :   True                    # pixel based (True) or state based (False) experiment
-embedding         :   ???                     # choice of embedding network
-camera            :   top_cap2                # choice of camera to use for image generation
-device            :   cuda
-data_dir          :   data/datasets/metaworld-expert-v1.0/
-data_parallel     :   True
+env                     :   ???                     # name of environment (e.g. relocate-v0)
+algorithm               :   BC
+pixel_based             :   True                    # pixel based (True) or state based (False) experiment
+camera                  :   top_cap2                # choice of camera to use for image generation
+device                  :   cuda
+data_dir                :   /scratch/gunshi/mujoco_datasets/metaworld-expert-v1.0/
+data_parallel           :   True
+emb_fusion              :   concat                  # choice of embedding fusion method (concat or flare)
+emb_consolidation_type  :   3x3_conv                # choice of embedding consolidation method (conv1x1 or conv3x3 pr sum) 
+diffusion_timesteps     :   [199]
+diffusion_prompt        :   ???                     # choice of diffusion prompt
+
+spatial_dims            :   4
+embed_channel_dim       :   1280
+proprio_dim             :   4
+reduced_channel_dim     :   128
+stride                  :   1
 
 # experiment and evaluation
-seed              :   12345                   # used as base_seed for rolling out policy for eval in sample_paths
-epochs            :   100                     # number of outer epochs
-eval_frequency    :   5                       # frequency of epochs for evaluation and logging
-save_frequency    :   10                      # frequency of epochs for saving policies
-eval_num_traj     :   25                      # number of rollouts to eval
-num_cpu           :   1                       # for rolling out paths when evaluating                 
-num_demos         :   25                      # path to demo file auto-inferred from other inputs
-exp_notes         :   Add experiment notes here to help organize results down the road.
+seed                    :   12345                   # used as base_seed for rolling out policy for eval in sample_paths
+epochs                  :   100                     # number of outer epochs
+eval_frequency          :   10                      # frequency of epochs for evaluation and logging
+save_frequency          :   10                      # frequency of epochs for saving policies
+eval_num_traj           :   25                      # number of rollouts to eval
+num_cpu                 :   1                       # for rolling out paths when evaluating                 
+num_demos               :   25                      # path to demo file auto-inferred from other inputs
+exp_notes               :   Add experiment notes here to help organize results down the road.
 
 # environment related kwargs
 env_kwargs:
-    env_name      :   ${env}
-    suite         :   metaworld                
-    device        :   ${device}               # device to use for representation network (policy clamped to CPU for now)
-    image_width   :   256
-    image_height  :   256
-    camera_name   :   ${camera}
-    embedding_name :  ${embedding}                
-    pixel_based   :   ${pixel_based}
-    render_gpu_id :   0
-    seed          :   ${seed}
-    history_window :  3
-    add_proprio   :   True
-    proprio_key   :   gripper_proprio 
+    env_name            :   ${env}
+    embedding_config    :   ${model}
+    suite               :   metaworld                
+    device              :   ${device}               # device to use for representation network (policy clamped to CPU for now)
+    image_width         :   256
+    image_height        :   256
+    camera_name         :   ${camera}
+    embedding_name      :   ${model.metadata.algo}_${model.metadata.model}_${model.metadata.data}                
+    pixel_based         :   ${pixel_based}
+    render_gpu_id       :   0
+    seed                :   ${seed}
+    history_window      :   3
+    add_proprio         :   True
+    proprio_keys        :   ['gripper_proprio']
+    vision_key          :   'images'
+
 
 # BC agent setup
 bc_kwargs:
-    hidden_sizes  :   (256, 256, 256)
-    nonlinearity  :   relu
-    loss_type     :   'MSE'
-    batch_size    :   256
-    lr            :   1e-3
-    dropout       :   0
+    hidden_sizes        :   (256, 256, 256)
+    nonlinearity        :   relu
+    loss_type           :   'MSE'
+    batch_size          :   256
+    lr                  :   1e-3
+    dropout             :   0
+    l1_weight           :   0
 
 # logging
-job_name          :   metaworld_cortex_vil
+job_name                :   metaworld_cortex_vil
+save_video              :   False
+
 wandb:
-  project         :   ???
-  entity          :   ???
-# name            :   ${embedding}
+  project               :   ???
+  entity                :   ???
+  group                 :   ${env_kwargs.suite}
+  name                  :   ${env_kwargs.env_name}_${env_kwargs.embedding_name}_${seed}
+# name                  :   ${embedding}
 
 hydra:
     job:
         name: metaworld_cortex_vil
+    searchpath:
+        - file://../../../vc_models/src/vc_models/conf

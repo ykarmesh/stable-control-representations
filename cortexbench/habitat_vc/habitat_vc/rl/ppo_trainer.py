@@ -166,9 +166,18 @@ class ModifiedPPOTrainer(PPOTrainer):
                 len(self.config.VIDEO_DIR) > 0
             ), "Must specify a directory for storing videos on disk"
 
-        if os.path.isfile(self.config.EVAL_CKPT_PATH_DIR):
+        # if EVAL_CKPT_PATH_DIR is a path
+        if "/" in self.config.EVAL_CKPT_PATH_DIR:
+            checkpoint = self.config.EVAL_CKPT_PATH_DIR
+        else:
+            checkpoint = (
+                self.config.CHECKPOINT_FOLDER + "/" + self.config.EVAL_CKPT_PATH_DIR
+            )
+            print("Running Eval for ckpt {}".format(checkpoint))
+
+        if os.path.isfile(checkpoint):
             # evaluate single checkpoint
-            proposed_index = get_checkpoint_id(self.config.EVAL_CKPT_PATH_DIR)
+            proposed_index = get_checkpoint_id(checkpoint)
 
             if proposed_index is not None:
                 ckpt_idx = proposed_index
@@ -176,7 +185,7 @@ class ModifiedPPOTrainer(PPOTrainer):
                 ckpt_idx = 0
 
             self._eval_checkpoint(
-                self.config.EVAL_CKPT_PATH_DIR,
+                checkpoint,
                 checkpoint_index=ckpt_idx,
             )
 
@@ -207,13 +216,14 @@ class ModifiedPPOTrainer(PPOTrainer):
 
                 logger.info(f"=======current_ckpt: {current_ckpt}=======")
                 prev_ckpt_ind = current_ckpt_idx
-                with open(eval_iter_filename, "w") as file:
-                    file.write(str(prev_ckpt_ind))
 
                 self._eval_checkpoint(
                     checkpoint_path=current_ckpt,
                     checkpoint_index=prev_ckpt_ind,
                 )
+
+                with open(eval_iter_filename, "w") as file:
+                    file.write(str(prev_ckpt_ind))
 
                 if self.config.NUM_CHECKPOINTS - 1 == prev_ckpt_ind:
                     break

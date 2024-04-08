@@ -9,7 +9,7 @@ nodes: 4
 timeout_min: 4320
 constraint: volta32gb
 signal_delay_s: 300
-partition: devlab,learnlab
+partition: yourpartition
 name: ${hydra.job.name}
 _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.SlurmLauncher
 submitit_folder: ${hydra.sweep.dir}/.submitit/%j

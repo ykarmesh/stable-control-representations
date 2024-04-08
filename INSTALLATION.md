@@ -45,12 +45,6 @@ python setup.py develop --all # install habitat and habitat_baselines
 cd -
 ```
 
-Install the Trifinger environment:
-
-```bash
-pip install -e ./third_party/trifinger_simulation
-```
-
 Install local packages:
 
 
@@ -58,15 +52,10 @@ Install local packages:
 pip install -e ./vc_models  # Install model-loading API
 pip install -e ./cortexbench/mujoco_vc  # Install Visual IL tasks
 pip install -e ./cortexbench/habitat_vc  # Install Habitat tasks
-pip install -e ./cortexbench/trifinger_vc  # Install Habitat tasks
 ```
-
-To use the Habitat 2.0 Rearrangement benchmark, you need to set up a separate conda environment. The steps for doing this are described in the installation instructions, which can be found at [cortexbench/habitat2_vc/INSTALLATION.md](cortexbench/habitat2_vc/INSTALLATION.md).
 
 If you are unable to load `mujoco_py` with error `ImportError: cannot import name 'load_model_from_path' from 'mujoco_py' (unknown location)`, try running
 
 ```bash
 rm -rf ~/.local/lib/python3.8/site-packages/mujoco_py
 ```
-
-Furthermore, the recipe for running each benchmark on a bare Linux environment is included in our CircleCI job configuration, which can be found in the [`.circleci/config.yml`](.circleci/config.yml) file.

@@ -4,4 +4,4 @@
 # This source code is licensed under the CC-BY-NC license found in the
 # LICENSE file in the root directory of this source tree.
 
-import gym, dmc2gym, mjrl, mj_envs
+import gym, mjrl

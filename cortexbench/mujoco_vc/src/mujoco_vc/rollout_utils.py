@@ -11,8 +11,6 @@ from mjrl.utils import tensor_utils
 from tqdm import tqdm
 
 logging.disable(logging.CRITICAL)
-import multiprocessing as mp
-import time as timer
 import gc
 
 
@@ -89,71 +87,3 @@ def rollout_from_init_states(
     del env
     gc.collect()
     return paths
-
-
-if __name__ == "__main__":
-    import pickle
-    from mjrl.policies.gaussian_mlp import MLP, BatchNormMLP
-    from gym_wrapper import env_constructor
-
-    # DMC test
-    data_paths = pickle.load(
-        open(
-            "/checkpoint/maksymets/vc/datasets/dmc-expert-v0.1/dmc_reacher_easy-v1.pickle",
-            "rb",
-        )
-    )
-    e = env_constructor(
-        env_name="dmc_reacher_easy-v1",
-        camera=0,
-        embedding_name="r3m_resnet50_ego4d",
-        history_window=3,
-        seed=12345,
-    )
-    policy = BatchNormMLP(e.spec, dropout=0.0)
-    init_states = [
-        p["env_infos"]["internal_state"][0].astype(np.float64) for p in data_paths
-    ]
-    del data_paths
-    gc.collect()
-
-    paths = rollout_from_init_states(
-        init_states=init_states,
-        env=e,
-        policy=policy,
-        eval_mode=True,
-        horizon=10,  # short horizon for debugging
-        debug=True,  # will toggle tqdm
-    )
-
-    # Adroit test
-    data_paths = pickle.load(
-        open(
-            "/checkpoint/maksymets/vc/datasets/adroit-expert-v0.1/pen-v0.pickle", "rb"
-        )
-    )
-    e = env_constructor(
-        env_name="pen-v0",
-        camera=0,
-        embedding_name="r3m_resnet50_ego4d",
-        history_window=3,
-        seed=12345,
-    )
-    policy = BatchNormMLP(e.spec, dropout=0.0)
-    init_states = [p["init_state_dict"] for p in data_paths]
-    del data_paths
-    gc.collect()
-
-    paths = rollout_from_init_states(
-        init_states=init_states,
-        env=e,
-        policy=policy,
-        eval_mode=True,
-        horizon=10,  # short horizon for debugging
-        debug=True,  # will toggle tqdm
-    )
-
-    # Metaworld
-    # Current dataset did not store the full state information.
-    # So excat scene configuration cannot be recreated.
-    # Fixing this requires recollecting the dataset or using the same seed as collection (123)

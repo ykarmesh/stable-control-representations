@@ -4,29 +4,21 @@
 # This source code is licensed under the CC-BY-NC license found in the
 # LICENSE file in the root directory of this source tree.
 
-from vc_models import vc_models_dir_path
-from omegaconf import OmegaConf
 from PIL import Image
-import os
 import hydra
-import torch, torchvision.transforms as T
+import torch
 import numpy as np
 
 
 # ===================================
 # Model Loading
 # ===================================
-def load_pretrained_model(embedding_name, input_type=np.ndarray, *args, **kwargs):
+def load_pretrained_model(embedding_config, input_type=np.ndarray, *args, **kwargs):
     """
     Load the pretrained model based on the config corresponding to the embedding_name
     """
-
-    config_path = os.path.join(
-        vc_models_dir_path, "conf/model", embedding_name + ".yaml"
-    )
-    print("Loading config path: %s" % config_path)
-    config = OmegaConf.load(config_path)
-    model, embedding_dim, transforms, metadata = hydra.utils.call(config)
+    model, embedding_dim, transforms, metadata = hydra.utils.call(embedding_config)
+    print("embedding_dim: %s" % embedding_dim)
     model = model.eval()  # model loading API is unreliable, call eval to be double sure
 
     def final_transforms(transforms):
