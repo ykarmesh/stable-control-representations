@@ -1,6 +1,6 @@
 defaults:
     - model: diffusion_sd_15_laion
-    - wandb: cortexbench
+    - wandb: scr
     - override hydra/launcher: local
     - _self_
 
@@ -63,7 +63,7 @@ bc_kwargs:
     l1_weight           :   0
 
 # logging
-job_name                :   metaworld_cortex_vil
+job_name                :   metaworld_scr_vil
 save_video              :   False
 
 wandb:
@@ -75,6 +75,6 @@ wandb:
 
 hydra:
     job:
-        name: metaworld_cortex_vil
+        name: metaworld_scr_vil
     searchpath:
         - file://../../../vc_models/src/vc_models/conf

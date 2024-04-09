@@ -6,8 +6,8 @@ We test the pretrained visual reprensetations in the few-shot visual imitation l
 ## Downloading demonstration datasets
 To download the demonstration datasets, create a directory for the dataset by executing the following command:
 ```bash
-mkdir -p cortexbench/mujoco_vc/visual_imitation/data/datasets
-cd cortexbench/mujoco_vc/visual_imitation/data/datasets
+mkdir -p benchmarks/mujoco_vc/visual_imitation/data/datasets
+cd benchmarks/mujoco_vc/visual_imitation/data/datasets
 ```
 
 Then, download the dataset with the following commands:
@@ -21,7 +21,7 @@ rm metaworld-expert-v1.0.zip
 ## Running experiments
 To run experiments, navigate to the `visual_imitation` subdirectory, which contains launch scripts and config files, by executing the following commands:
 ```bash
-cd eai-vc/cortexbench/mujoco_vc/visual_imitation/
+cd stable-control-representations/benchmarks/mujoco_vc/visual_imitation/
 ```
 To run the job, execute the following script:
 ```bash

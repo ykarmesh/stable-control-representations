@@ -3,8 +3,8 @@
 Clone the repo:
 
 ```bash
-git clone  https://github.com/facebookresearch/eai-vc.git
-cd eai-vc
+git clone git@github.com:ykarmesh/stable-control-representations.git
+cd stable-control-representations
 
 git submodule update --init --recursive  # Also necessary if we updated any submodules
 ```
@@ -13,7 +13,7 @@ git submodule update --init --recursive  # Also necessary if we updated any subm
 
 ```bash
 conda env create -f environment.yml
-conda activate eai-vc  # Alternatively, `direnv allow`
+conda activate stable-control-representations  # Alternatively, `direnv allow`
 ```
 
 Setup Mujoco/mj_envs/mjrl:
@@ -34,7 +34,6 @@ pip install -e ./third_party/mujoco-py
 # Install mj_envs/mjrl
 pip install -e ./third_party/mj_envs
 pip install -e ./third_party/mjrl
-pip install -e ./third_party/dmc2gym
 ```
 
 Install Habitat-Lab v0.2.1 (patched to remove Tensorflow dependencies):
@@ -50,8 +49,8 @@ Install local packages:
 
 ```bash
 pip install -e ./vc_models  # Install model-loading API
-pip install -e ./cortexbench/mujoco_vc  # Install Visual IL tasks
-pip install -e ./cortexbench/habitat_vc  # Install Habitat tasks
+pip install -e ./benchmarks/mujoco_vc  # Install Visual IL tasks
+pip install -e ./benchmarks/habitat_vc  # Install Habitat tasks
 ```
 
 If you are unable to load `mujoco_py` with error `ImportError: cannot import name 'load_model_from_path' from 'mujoco_py' (unknown location)`, try running

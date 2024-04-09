@@ -34,14 +34,13 @@ function run_diffusion {
 CONFIG_NAME=Metaworld_BC_config.yaml
 
 SPECIAL_ARGS="model=diffusion_sd_15_laion \
-    spatial_dims=4 \
-    embed_channel_dim=2560 \
-    reduced_channel_dim=48 \
+    spatial_dims=8 \
+    embed_channel_dim=4480 \
+    reduced_channel_dim=12 \
     emb_consolidation_type=3x3_conv \
-    diffusion_timesteps=[0] \
-    model.model.representation_layer_name=["down_3","mid"] \
-    model.model.unet_path=/scratch/gunshi/unet_ema/ \
-    wandb.project=cortexbench_metaworld_bad_prompt"
+    diffusion_timesteps=[200] \
+    model.model.representation_layer_name=["down_1","down_2","down_3","mid"] \
+    model.model.unet_path=/path/to/unet"
 
 SPECIAL_ARGS="$SPECIAL_ARGS seed=12345"
 run_diffusion

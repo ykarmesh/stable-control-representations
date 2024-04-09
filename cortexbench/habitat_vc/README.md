@@ -2,7 +2,7 @@
 
 1. To run experiments in Habitat, first we need to get access to the necessary scene dataset. We are using Gibson scene datasets for our ImageNav experiment. You can find instructions for downloading the dataset [here](https://github.com/facebookresearch/habitat-sim/blob/main/DATASETS.md#gibson-and-3dscenegraph-datasets).
 
-1. Next we need the episode dataset for ImageNav. You can get the training and validation dataset from [here](https://huggingface.co/datasets/ykarmesh/imagenav_gibson/tree/main) and place the `train` and `val` folders in the [./data](./data) folder under the path : `data/datasets/pointnav/gibson/v1/`. 
+1. Next we need the episode dataset for ImageNav. You can get the training and validation dataset from [here](https://huggingface.co/datasets/ykarmesh/imagenav_gibson) and place the `train` and `val` folders in the [./data](./data) folder under the path : `data/datasets/pointnav/gibson/v1/`. 
 
 1. Now we are ready to start training the agent. Checkout the `run_habitat_vc.py` script, which allows running an experiment on the cluster. The script can be used as follows:
    ```bash

@@ -164,7 +164,4 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# Trifinger dataset files
-cortexbench/trifinger_vc/assets/data
-cortexbench/trifinger_vc/assets/data.zip
 
