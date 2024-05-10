@@ -1,5 +1,5 @@
 # Stable Control Representations
-[Paper Link](https://arxiv.org/)
+[Paper Link](https://arxiv.org/abs/2405.05852)
 
 <p align="center">
   <img src="res/img/SD_teaser.png" alt="Visual Cortex and CortexBench" width="600">
@@ -27,22 +27,22 @@ Please follow the instructions in [INSTALLATION.md](INSTALLATION.md) to install 
 
 
 ## Reproducing Results with the SCR Model
-To reproduce the results with the SCR model, please follow the README instructions for each of the benchmarks in [`benchmarks`](./benchmarks/).
+To reproduce the results with the SCR model, please follow the README instructions for each of the benchmarks in [`cortexbench`](./cortexbench/).
 
 
 ## Citing SCR
-If you use SCR in your research, please cite [the following paper](https://arxiv.org/):
+If you use SCR in your research, please cite [the following paper](https://arxiv.org/abs/2405.05852):
 
 ```bibtex
 @inproceedings{gupta2024scr,
       title={Pre-trained Text-to-Image Diffusion Models Are Versatile Representation Learners for Control},
       author={Gunshi Gupta and Karmesh Yadav and Yarin Gal and Dhruv Batra and Zsolt Kira and Cong Lu and Tim G. J. Rudner},
       year={2024},
-      eprint={},
+      eprint={2405.05852},
       archivePrefix={arXiv},
       primaryClass={cs.CV}
 }
 ```
 
 ## Acknowledgement
-This code repo is based on the [Visual Cortex](https://github.com/facebookresearch/eai-vc/tree/main) codebase
+This code repo is based on the [Visual Cortex](https://github.com/facebookresearch/eai-vc/tree/main) codebase.
