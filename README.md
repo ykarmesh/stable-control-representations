@@ -1,5 +1,5 @@
 # Stable Control Representations
-[Paper Link](https://arxiv.org/abs/2405.05852)
+[Paper Link](https://arxiv.org/abs/2405.05852) | [Model Link](https://huggingface.co/ykarmesh/stable-control-representations)
 
 <p align="center">
   <img src="res/img/SD_teaser.png" alt="Visual Cortex and CortexBench" width="600">
@@ -45,4 +45,4 @@ If you use SCR in your research, please cite [the following paper](https://arxiv
 ```
 
 ## Acknowledgement
-This code repo is based on the [Visual Cortex](https://github.com/facebookresearch/eai-vc/tree/main) codebase.
+We are thankful to the creators of Stable Diffusion for releasing the model, which has significantly contributed to the progress in the field. Additionally, we extend our thanks to the authors of [Visual Cortex](https://github.com/facebookresearch/eai-vc/tree/main) for releasing the code for CortexBench evaluations.
