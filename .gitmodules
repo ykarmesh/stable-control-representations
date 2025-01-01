@@ -16,3 +16,7 @@
 [submodule "third_party/metaworld"]
 	path = third_party/metaworld
 	url = https://github.com/suraj-nair-1/metaworld.git
+[submodule "diffusers"]
+	path = diffusers
+	url = https://github.com/ykarmesh/diffusers
+	branch = stable_control_representations

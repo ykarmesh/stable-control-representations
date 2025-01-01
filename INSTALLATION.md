@@ -16,6 +16,12 @@ conda env create -f environment.yml
 conda activate stable-control-representations  # Alternatively, `direnv allow`
 ```
 
+Install Diffusers library (with our custom changes):
+```bash
+cd third_party/diffusers
+pip install -e .[torch]
+```
+
 Setup Mujoco/mj_envs/mjrl:
 ```bash
 mkdir ~/.mujoco
