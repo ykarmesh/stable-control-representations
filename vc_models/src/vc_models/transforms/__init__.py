@@ -11,6 +11,18 @@ from vc_models.transforms.random_shifts_aug import RandomShiftsAug
 from vc_models.transforms.randomize_env_transform import RandomizeEnvTransform
 
 
+def diffusion_transforms(resize_size=256, center_crop=True):
+    # Preprocessing the datasets.
+    return T.Compose(
+        [
+            T.Resize(resize_size, interpolation=T.InterpolationMode.BILINEAR),
+            T.CenterCrop(resize_size) if center_crop else T.Identity(),
+            ToTensorIfNot(),
+            T.Normalize([0.5], [0.5]),
+        ]
+    )
+
+
 def vit_transforms(resize_size=256, output_size=224):
     return T.Compose(
         [
@@ -29,31 +41,6 @@ def resnet_transforms(resize_size=256, output_size=224):
             T.CenterCrop(output_size),
             ToTensorIfNot(),
             T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
-        ]
-    )
-
-
-def r3m_transforms(resize_size=256, output_size=224):
-    return T.Compose(
-        [
-            ToTensorIfNot(),  # this divides by 255
-            T.Resize(resize_size),
-            T.CenterCrop(output_size),
-            T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ]
-    )
-
-
-def clip_transforms(resize_size=256, output_size=224):
-    return T.Compose(
-        [
-            T.Resize(resize_size, interpolation=T.InterpolationMode.BICUBIC),
-            T.CenterCrop(output_size),
-            ToTensorIfNot(),
-            T.Normalize(
-                (0.48145466, 0.4578275, 0.40821073),
-                (0.26862954, 0.26130258, 0.27577711),
-            ),
         ]
     )
 
